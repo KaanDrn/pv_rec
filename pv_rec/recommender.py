@@ -42,6 +42,7 @@ class Recommender:
         data_b=wlw_data.drop(['product_categories'], axis=1).copy()
 
         self.ml_data=data_a.combine_first(data_b).copy()
+        self.ml_data.sort_index(inplace=True, axis=1)
 
         # for later identification
         mastr_data["source"]="mastr"
