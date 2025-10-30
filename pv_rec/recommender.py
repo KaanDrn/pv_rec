@@ -29,6 +29,7 @@ class Recommender:
         self.pv_affinity_scores=None
 
     def fit(self, wlw_data: pd.DataFrame, mastr_data: pd.DataFrame,
+            mapping_needed: bool=True,
             method='ward', metric='euclidean'):
         """
         Fit the recommender model using the provided company data.
@@ -38,8 +39,14 @@ class Recommender:
         """
         start_time=time.time()
         log.info("Preparing data")
-        data_a=mastr_data.drop(['product_categories'], axis=1).copy()
-        data_b=wlw_data.drop(['product_categories'], axis=1).copy()
+        if 'product_categories' in wlw_data.columns or \
+           'product_categories' in mastr_data.columns:
+            log.info("Dropping product categories")
+            data_a=mastr_data.drop(['product_categories'], axis=1).copy()
+            data_b=wlw_data.drop(['product_categories'], axis=1).copy()
+        else:
+            data_a=mastr_data.copy()
+            data_b=wlw_data.copy()
 
         self.ml_data=data_a.combine_first(data_b).copy()
         self.ml_data.sort_index(inplace=True, axis=1)
@@ -48,8 +55,9 @@ class Recommender:
         mastr_data["source"]="mastr"
         wlw_data["source"]="wlw"
 
-        log.info("Map categorical data")
-        self.ml_data=self._map_ordinal_data(self.ml_data)
+        if mapping_needed:
+            log.info("Map categorical data")
+            self.ml_data=self._map_ordinal_data(self.ml_data)
 
         log.info("handle NaNs")
         self.ml_data.fillna(0, inplace=True)
@@ -109,17 +117,19 @@ class Recommender:
 
         return self.pv_affinity_scores
 
-    def recommend(self, company_data: pd.DataFrame):
+    def recommend(self, company_data: pd.DataFrame, mapping_needed: bool=True):
         new_company=company_data.copy()
 
-        log.info("map categorical data")
-        new_company=self._map_ordinal_data(new_company)
+        if mapping_needed:
+            log.info("map categorical data")
+            new_company=self._map_ordinal_data(new_company)
 
         log.info("handle nans")
         new_company.fillna(0, inplace=True)
 
         log.info("set columns in correct order")
-        new_company.drop("product_categories", axis=1, inplace=True)
+        if "product_categories" in new_company.columns:
+            new_company.drop("product_categories", axis=1, inplace=True)
 
         for column in self.column_shema:
             if column not in new_company.columns and \

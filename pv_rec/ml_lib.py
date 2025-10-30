@@ -56,14 +56,15 @@ class WlwProductEncoder(AbstractProductEncoder):
     def __init__(
         self,
         products,
-        model_name="Snowflake/snowflake-arctic-embed-l-v2.0"
+        model_name="Snowflake/snowflake-arctic-embed-l-v2.0",
+        needs_preprocessing=True
         ):
         super().__init__(
             products=products,
             model_name=model_name
             )
-
-        self._pre_process_data()
+        if needs_preprocessing:
+            self._pre_process_data()
 
     def _pre_process_data(self):
         self._make_products_unique()
