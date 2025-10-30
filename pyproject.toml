@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pv_rec"
-version = "0.1.2"
+version = "0.1.2rc1"
 description = ""
 authors = ["Kaan Duran"]
 readme = "README.md"
