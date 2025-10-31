@@ -41,10 +41,11 @@ class AbstractProductEncoder(_HuggingFaceConnection):
         if self.model is None:
             self.model = SentenceTransformer(self.model_name)
 
-        embeddings = self.model.encode(
-            texts,
-            show_progress_bar=True
-        )
+        with torch.no_grad():
+            embeddings = self.model.encode(
+                texts,
+                show_progress_bar=True
+            )
         embeddings_df = pd.DataFrame(
             embeddings,
             index=texts,
